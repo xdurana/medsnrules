@@ -1,0 +1,8 @@
+Here are my association rules:
+  
+```{r rules, collapse=TRUE}
+    plot(rules()[1:nR()],
+         method='graph',
+         control=list(type=input$graphType)
+         )
+```
