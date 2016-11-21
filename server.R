@@ -3,6 +3,9 @@ library(arules)
 library(arulesViz)
 library(dplyr)
 
+library(visNetwork)
+library(igraph)
+
 data(medsnconditions)
 data(dictionary)
 
@@ -81,18 +84,6 @@ function(input, output) {
   output$scatterPlot <- renderPlot({
     ar <- rules()
     plot(sort(ar, by=input$sort)[1:nR()], method='scatterplot')
-  }, height=800, width=800)
-  
-  ## Matrix Plot ###################
-  output$matrixPlot <- renderPlot({
-    ar <- rules()
-    plot(sort(ar, by=input$sort)[1:nR()], method='matrix', control=list(reorder=T))
-  }, height=800, width=800)
-  
-  ## Item Frequency Plot ##########################
-  output$itemFreqPlot <- renderPlot({
-    trans <- as(dataset, 'transactions')
-    itemFrequencyPlot(trans)
   }, height=800, width=800)
   
   ## Rules Data Table ##########################

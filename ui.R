@@ -1,67 +1,84 @@
 library(shiny)
 library(shinythemes)
+library(shinydashboard)
 
-supp <- 0.001
-conf <- 0.8
+header <- dashboardHeader(
+  title = "GCAT",
+  disable = TRUE
+)
 
-shinyUI(
-  fluidPage(
-    theme = shinytheme("flatly"),
-  
-    #headerPanel("Association Rules"),
-    
-    navbarPage(
-      "GCAT",
-      tabPanel("Association rules",
-        sidebarPanel(
-          selectizeInput(
-            'lhs', 'LHS', choices = unique(dictionary$category),
-            multiple = TRUE, options = list()
+sidebar <- dashboardSidebar(
+  disable = TRUE
+)
+
+body <- dashboardBody(
+  fluidRow(
+    column(
+      width = 9,
+      box(
+        width = NULL,
+        title='Association rules',
+        status='primary',
+        solidHeader = TRUE,
+        collapsible = TRUE,
+        tabsetPanel(
+          tabPanel(
+            title='Graph',
+            value='graph',
+            plotOutput("graphPlot", width='100%', height='100%'),
+            radioButtons('graphType', label='Graph Type', choices=c('items','itemsets'), inline=T)
           ),
-          selectizeInput(
-            'rhs', 'RHS', choices = unique(dictionary$category),
-            multiple = TRUE, options = list()
+          tabPanel(
+            title='Grouped',
+            plotOutput("groupedPlot", width='100%', height='100%'),
+            sliderInput('k', label='Choose # of rule clusters', min=1, max=150, step=1, value=15)
           ),
-          conditionalPanel(
-            condition = "input.samp=='Sample'",
-            numericInput("nrule", 'Number of Rules', 5), br()
+          tabPanel(
+            title='Scatter',
+            value='scatter',
+            plotOutput("scatterPlot", width='100%', height='100%')
           ),
-          conditionalPanel(
-            condition = "input.mytab=='graph'",
-            radioButtons('graphType', label='Graph Type', choices=c('itemsets','items'), inline=T), br()
-          ),
-          conditionalPanel(
-            condition = "input.mytab=='grouped'",
-            sliderInput('k', label='Choose # of rule clusters', min=1, max=150, step=1, value=15), br()
-          ),
-          conditionalPanel(
-            condition = "true", 
-            radioButtons('samp', label='Sample', choices=c('Sample', 'All Rules'), inline=T), br(),
-            sliderInput("supp", "Support:", min = 0, max = 1, value = supp , step = 1/10000), br(),
-            sliderInput("conf", "Confidence:", min = 0, max = 1, value = conf , step = 1/10000), br(),
-            selectInput('sort', label='Sorting Criteria:', choices = c('chiSquare', 'lift', 'confidence', 'support')), br(), br(),
-            numericInput("minL", "Min. items per set:", 2), br(), 
-            numericInput("maxL", "Max. items per set::", 3), br(),
-            downloadButton('downloadData', 'Download Rules as CSV'),
-            downloadButton('downloadReport')
-          )
-        ),
-        
-        mainPanel(
-          tabsetPanel(
-            id='mytab',
-            tabPanel('Grouped', value='grouped', plotOutput("groupedPlot", width='100%', height='100%')),
-            tabPanel('Graph', value='graph', plotOutput("graphPlot", width='100%', height='100%')),
-            tabPanel('Scatter', value='scatter', plotOutput("scatterPlot", width='100%', height='100%')),
-            tabPanel('Matrix', value='matrix', plotOutput("matrixPlot", width='100%', height='100%')),
-            tabPanel('ItemFreq', value='itemFreq', plotOutput("itemFreqPlot", width='100%', height='100%')),
-            tabPanel('Table', value='table', verbatimTextOutput("rulesTable")),
-            tabPanel('Data Table', value='datatable', dataTableOutput("rulesDataTable"))
+          tabPanel(
+            title='Data Table',
+            value='datatable',
+            dataTableOutput("rulesDataTable")
           )
         )
-      ),
-      tabPanel("Descriptive"
+      )
+    ),
+    column(
+      width = 3,
+      box(
+        width = NULL,
+        title = 'Configuration',
+        status = "warning",
+        solidHeader = TRUE,
+        collapsible = TRUE,
+        numericInput("nrule", 'Number of Rules', 15),
+        radioButtons('samp', label='Sample', choices=c('Sample', 'All Rules'), inline=T), br(),
+        sliderInput("supp", "Support:", min = 0, max = 1, value = 0.001 , step = 1/10000), br(),
+        sliderInput("conf", "Confidence:", min = 0, max = 1, value = 0.8 , step = 1/10000), br(),
+        selectInput('sort', label='Sorting Criteria:', choices = c('chiSquare', 'lift', 'confidence', 'support')), br(), br(),
+        numericInput("minL", "Min. items per set:", 2), br(), 
+        numericInput("maxL", "Max. items per set::", 3), br(),
+        selectizeInput(
+          'lhs', 'LHS', choices = unique(dictionary$category),
+          multiple = TRUE, options = list()
+        ),
+        selectizeInput(
+          'rhs', 'RHS', choices = unique(dictionary$category),
+          multiple = TRUE, options = list()
+        ),
+        downloadButton('downloadData', 'Download Rules as CSV'),
+        br(),
+        downloadButton('downloadReport')
       )
     )
   )
+)
+
+dashboardPage(
+  header,
+  sidebar,
+  body
 )
