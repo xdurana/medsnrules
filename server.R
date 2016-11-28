@@ -9,11 +9,16 @@ library(igraph)
 data(medsnconditions)
 data(dictionary)
 
-tr <- as(dataset, 'transactions')
-
 function(input, output) {
   
   rules <- reactive({
+
+    variables <- dictionary %>%
+      filter(category %in% input$categories)
+    
+    ds <- dataset[, variables$variable]
+    
+    tr <- as(ds, 'transactions')
     
     arAll <- apriori(tr,
                      parameter = list(support=input$supp,
@@ -21,18 +26,18 @@ function(input, output) {
                                     minlen=input$minL,
                                     maxlen=input$maxL))
 
-    colsL <- colnames(dataset)
-    colsR <- colnames(dataset)
+    colsL <- variables$variable
+    colsR <- variables$variable
 
     if (!is.null(input$lhs)) {
-      colsL <- dictionary %>%
+      colsL <- variables %>%
         filter(category %in% input$lhs) %>%
         select(variable)
       colsL <- colsL$variable
     }
     
     if (!is.null(input$rhs)) {
-      colsR <- dictionary %>%
+      colsR <- variables %>%
         filter(category %in% input$rhs) %>%
         select(variable)
       colsR <- colsR$variable
@@ -102,7 +107,29 @@ function(input, output) {
   output$downloadData <- downloadHandler(
     filename = 'arules_data.csv',
     content = function(file) {
-      write.csv(as(rules(), "data.frame"), file)
+      arules.show <- as(rules(), "data.frame")
+      result <- arules.show$rules
+      result <- gsub('\\{', '', result)
+      result <- gsub('\\}', '', result)
+      result <- strsplit(result, ' => ')
+      result <- as.data.frame(do.call(rbind, result))
+      arules.table <- arules.show %>%
+        mutate(
+          lhs = result$V1,
+          rhs = result$V2
+        ) %>%
+        select(
+          lhs,
+          rhs,
+          support,
+          confidence,
+          lift,
+          chiSquare
+        ) %>%
+        arrange(
+          desc(chiSquare)
+        )
+      write.csv(arules.table, file, row.names = FALSE)
     }
   )
   

@@ -61,6 +61,12 @@ body <- dashboardBody(
         selectInput('sort', label='Sorting Criteria:', choices = c('chiSquare', 'lift', 'confidence', 'support')), br(), br(),
         numericInput("minL", "Min. items per set:", 2), br(), 
         numericInput("maxL", "Max. items per set::", 3), br(),
+        checkboxGroupInput(
+          "categories",
+          "Categories to show:",
+          unique(dictionary$category),
+          selected = unique(dictionary$category)
+        ),
         selectizeInput(
           'lhs', 'LHS', choices = unique(dictionary$category),
           multiple = TRUE, options = list()
@@ -69,9 +75,7 @@ body <- dashboardBody(
           'rhs', 'RHS', choices = unique(dictionary$category),
           multiple = TRUE, options = list()
         ),
-        downloadButton('downloadData', 'Download Rules as CSV'),
-        br(),
-        downloadButton('downloadReport')
+        downloadButton('downloadData', 'Download Rules as CSV')
       )
     )
   )
