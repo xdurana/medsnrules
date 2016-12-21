@@ -1,0 +1,21 @@
+graph G {
+  
+  graph [
+    rankdir=LR,
+    size="6,6"
+  ]
+  
+	node [
+	  shape=circle,
+	  color=lightblue2,
+	  style=filled
+	];
+	
+  malalties--a;
+  a--CIM9;
+  medicació--b;
+  b--ATC;
+  CIM9--rules;
+  ATC--rules;
+  rules--associacions;
+}

@@ -1,0 +1,49 @@
+digraph workflow {
+  
+  edge [
+    color = grey
+    arrowhead = none
+    arrowtail = none
+  ]
+  
+  node [
+    fontcolor = darkslategray
+    fixedsize = true
+    fontname=Helvetica
+    width = 1
+    color = darkslategray
+  ]
+
+  graph [
+    overlap = true,
+    fontsize = 10
+  ]
+
+  node [
+    shape=circle
+  ]
+  1
+  2
+  3
+
+  node [
+    shape=box
+  ]
+  GCAT
+  Malalties
+  Medicació
+  CIM9
+  ATC
+  Associacions
+
+  GCAT->Malalties
+  GCAT->Medicació
+  Malalties->1
+  1->CIM9
+  Medicació->2
+  2->ATC
+  CIM9->3
+  ATC->3
+  3->Associacions
+  
+}

@@ -1,0 +1,215 @@
+---
+title: Regles d'associació de malalties i medicació a GCAT
+subtitle:
+author: |
+  | Xavier Duran Albareda
+  | GCAT Genomes for Life
+  | Institut de Recerca Germans Trias i Pujol (IGTP)
+date: |
+  | 29 de Novembre del 2016
+header-includes:
+output:
+  beamer_presentation:
+    theme: "gcat"
+    incremental: no
+    keep_tex: yes
+    fig_caption: false
+    dev: png
+    slide_level: 2
+    toc: no
+---
+
+## Codificació de les malalties
+### CIM-9-MC
+
+La CIM-9-MC és l'instrument de referència a Catalunya per codificar malalties i procediments en l'àmbit hospitalari, en el de la salut mental (tant d'internament com d'atenció ambulatòria) i en el dels recursos sociosanitaris, i en alguns centres d’atenció primària, entre d'altres.
+
+### CIM-10-MC/PCS
+
+La CIM-10-MC/PCS serà el nou estàndard per a la codificació de malalties i procediments a Catalunya i es preveu que entri en vigor a partir de l’1 de gener de 2017.
+
+## Codificació de les malalties
+### CIM-10-MC/PCS
+
+- es passa de 16.019 codis a 82.108
+- s’afegeix informació rellevant per a l’atenció ambulatòria
+- s’amplien els codis de lesions
+- la nova estructura permet l’expansió futura de la classificació
+
+\begin{figure}[v]
+  \mbox{\includegraphics[height=.8in]{images/Training_icd9_example.png}}
+  \mbox{\includegraphics[height=.8in]{images/Training_icd10_conversionV2.png}}
+  \caption{CIM-9-MC i CIM-10-MC/PCS}\label{fig:conversion}
+\end{figure}
+
+## Codificació de les malalties
+### CIM-9-MC a CIM-10-MC/PCS. Exemple (diabetis)
+
+Estàndard     Codificació Descripció
+------------- ----------- ----------
+CIM-9-MC      25000       Diabetis mellitus sense menció
+                          de complicació, tipus II
+                          o tipus no especificat,
+                          no esmentada com a incontrolada
+CIM-10-MC/PCS E119        Diabetis mellitus de tipus 2
+
+:Codificació CIM-9-MC i CIM-10-MC/PCS de la Diabetis
+
+## Codificació de les malalties
+### Codificació de les malalties autoreportades a CIM-9-MC
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+library(dplyr)
+library(xtable)
+summary.cim9 <- read.csv2(file.path('data', 'summary-cim9.csv'), sep = ';', stringsAsFactors = FALSE)
+summary.cim9.codi <- summary.cim9 %>% select(Text, Freq, Codi, Descr_codi) %>% arrange(-Freq)
+options(xtable.comment = FALSE)
+colnames(summary.cim9.codi) <- c('Text', 'Freqüència', 'Codi', 'Descripció')
+print(xtable(summary.cim9.codi[1:20,], auto = TRUE, caption="Codificació manual de les malalties"), scalebox = 0.4, include.rownames=FALSE, latex.environments="flushleft")
+```
+## Codificació de les malalties
+### Codificació de les malalties autoreportades a CIM-9-MC
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+library(dplyr)
+library(xtable)
+summary.cim9 <- read.csv2(file.path('data', 'summary-cim9.csv'), sep = ';', stringsAsFactors = FALSE)
+summary.cim9.codi <- summary.cim9 %>% select(Text, Freq, Codi_3, Descr_codi_3) %>% arrange(-Freq)
+colnames(summary.cim9.codi) <- c('Text', 'Freqüència', 'Codi', 'Descripció')
+options(xtable.comment = FALSE)
+print(xtable(summary.cim9.codi[1:20,], auto = TRUE, caption="Codificació manual de les malalties"), scalebox = 0.4, include.rownames=FALSE, latex.environments="flushleft")
+```
+
+## Codificació de la medicació
+### ATC
+
+El codi ATC o Sistema de Classificació Química Anatomicoterapèutica és un índex de substàncies farmacològiques i medicaments, organitzats segons grups terapèutics.
+
+El codi arreplega el sistema o òrgan sobre el qual actua, l'efecte farmacològic, les indicacions terapèutiques i l'estructura química del fàrmac.
+
+Nivell ATC            Codi ATC  Descripció
+--------------------  --------  ----------
+Grup anatòmic         A         Sistema digestiu i metabolisme
+Grup terapèutic       A10       Fàrmacs usats en diabetis
+Subgrup farmacològic  A10B      Fàrmacs hipoglucemiants orals
+Subgrup químic        A10B A    Biguanides
+Substància química    A10B A02  Metformina
+
+:Codificació ATC de la Metformina
+
+## Codificació de la medicació
+### Medicaments autoreportats al GCAT
+
+|\# Medicaments | Codificació|
+|--------------:| -----------|
+|14961          | codificats |
+| 2406          | text lliure|
+
+: Nombre i codificació de medicaments reportats
+
+Com podem transformar *automàticament* els medicaments reportats en text lliure?
+
+## Codificació de la medicació
+### Medicaments autoreportats al GCAT
+
+Tranquimazin Retard 0.25 mg
+
+- Convertir text a majúscules
+- Eliminar informació de dosatge
+- Eliminar puntuació
+- Buscar el terme més semblant al diccionari (distància de Levenshtein)
+
+N05BA	TRANKIMAZIN RETARD
+
+## Codificació de la medicació
+### Conversió automàtica de text lliure. Resultats
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+library(dplyr)
+library(xtable)
+errors <- read.csv2(file.path('data', 'errors.csv'), sep = ',', stringsAsFactors = FALSE)
+
+errors.show <- errors %>% select(value, CODI_ATC_0.9, NOMBRE_0.9, CODI_ATC_0.8, NOMBRE_0.8) %>% filter(CODI_ATC_0.8 != '')
+
+colnames(errors.show)  <- c(
+  'Text', 'Codi 90%', 'Nom 90%', 'Codi 80%', 'Nom 80%'
+)
+print(xtable(errors.show[1:20,], auto = TRUE, caption="Correcció automàtica de medicaments"), scalebox = 0.4, include.rownames=FALSE)
+```
+
+## Codificació de la medicació
+### Conversió automàtica de text lliure. Resultats
+
+2406 medicaments no codificats
+
+|Semblança (%) | Cobertura | Descripció           |
+|-------------:| ---------:| -------------------- |
+|90%           |  735/2406 | Fiable               |
+|80%           | 1206/2406 | A vegades s'equivoca |
+|70%           | 1825/2406 | Massa errors         |
+
+:Conversió automàtica de text lliure a ATC
+
+## Regles d'associació
+### Definició
+
+Les regles d'associació troben patrons freqüents, associacions o correlacions entre conjunts d'ítems en bases de dades de transaccions. Donat un conjunt de transaccions, trobarem regles que prediguin l'ocurrència d'un ítem basat en la presència d'altres ítems en la transacció.
+
+Transacció       Items
+---------------- -----
+=E0025********21 A10 Drugs used in diabetes
+=E0025********21 250 Diabetis mellitus
+=E0025********21 C07 Beta blocking agents
+=E0025********21 SEXE=1
+=E0025********21 EDAT=[55,65]
+=E0025********21 WHR=[0.909,1.226]
+
+## Regles d'associació
+
+A10 Drugs used in diabetes $\Rightarrow$ 250 Diabetis mellitus [support=2%, confidence=93%, lift=26.73, $\chi^2$=6414.32]
+
+### Indicadors
+
+$support(A \Rightarrow B) = P(A \cup B)$
+
+$confidence(A \Rightarrow B) = P(B|A) = \frac{P(A \cup B)}{P(A)}$
+
+$lift(A \Rightarrow B) = confidence(A \Rightarrow B)/P(B) = \frac{P(A \cup B)}{P(A)P(B)}$
+
+$\chi^2(A \Rightarrow B) = n\frac{P(A)P(B)}{(1-P(A))(1-P(B))}$
+
+## Regles d'associació
+### Resultats
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+library(dplyr)
+library(xtable)
+arules <- read.csv2(file.path('data', 'arules_data.csv'), sep = ',', stringsAsFactors = FALSE)
+arules <- arules %>%
+  mutate(
+    lhs=gsub('_', ' ', lhs),
+    rhs=gsub('_', ' ', rhs),
+    support=round(as.numeric(as.character(support))*100, digits = 2),
+    confidence=round(as.numeric(as.character(confidence))*100, digits = 2),
+    lift=round(as.numeric(lift), digits = 2),
+    chiSquare=round(as.numeric(chiSquare), digits = 2)
+  ) %>%
+  select(
+    lhs,
+    rhs,
+    support,
+    confidence,
+    lift,
+    chiSquare
+  )
+
+print(xtable(arules[1:40,], auto = TRUE, caption="Relacions entre malalties i medicaments inferides"), scalebox = 0.3, include.rownames=FALSE)
+```
+
+## Regles d'associació
+### Aplicació Shiny
+
+\begin{figure}[v]
+  \mbox{\includegraphics[height=2in]{images/medsnrules.png}}
+  \caption{https://xdurana.shinyapps.io/rules/}\label{fig:medsnrules}
+\end{figure}

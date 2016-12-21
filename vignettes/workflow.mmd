@@ -1,0 +1,22 @@
+graph LR
+
+  A(GCAT)-->|export| B[Malalties]
+  A(GCAT)-->|export| C[Medicació]
+
+  subgraph malalties
+  B-->D(ICD9)
+  end
+
+  subgraph medicació
+  C-->E(ATC)
+  end
+
+  D-->F[AR]
+  E-->F
+
+  style A fill:#DCEBE3
+  style B fill:#DEDBBA
+  style C fill:#DEDBBA
+  style D fill:#F8F0CC
+  style E fill:#F8F0CC
+  style F fill:#FCFCF2

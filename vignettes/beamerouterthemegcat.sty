@@ -1,0 +1,38 @@
+% This program can be redistributed and/or modified under the terms
+% of the GNU Public License, version 3.
+
+\mode<presentation>
+
+% color definitions
+\definecolor{uipaleblue}{RGB}{96,123,139}
+\definecolor{uigcatred}{RGB}{192,0,0}
+\definecolor{uigcat}{RGB}{139,123,96}
+
+% footer styling
+\setbeamercolor{section in footer}{fg=white,bg=uipaleblue}
+\setbeamercolor{subsection in footer}{fg=white,bg=uipaleblue}
+\setbeamercolor{pagenumber in footer}{fg=white,bg=uipaleblue}
+
+% \setbeamertemplate{caption}{\raggedright\insertcaption\par}
+\setbeamerfont{caption}{size=\scriptsize,series=\itshape}
+
+\defbeamertemplate*{footline}{gcattheme}
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.70\paperwidth,ht=2.25ex,dp=1ex,center]{section in footer}%
+    \inserttitle
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.20\paperwidth,ht=2.25ex,dp=1ex,center]{subsection in footer}%
+    \insertsectionhead
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.10\paperwidth,ht=2.25ex,dp=1ex,center]{pagenumber in footer}%
+   \insertframenumber{} / \inserttotalframenumber\hspace*{2ex}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+%\usebackgroundtemplate{\includegraphics[width=\paperwidth]{images/background.png}}%
+\setbeamersize{text margin left=1em,text margin right=1em}
+
+\mode
+<all>
